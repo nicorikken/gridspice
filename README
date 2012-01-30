@@ -1,0 +1,8 @@
+The GridSpice software package consists of 3 repositories:
+
+gridspice.simulator - The simulation software which is based on Gridlab-D, but also includes features for demand response and wholesale power simulation.
+gridspice.webserver - Web Server which spawns simulations sent through the interface, collects, and returns results
+gridspice.interface - UI Code for building / editing models
+
+
+To access these repositories, please select the repository from the drop down menu in the "source" section.
