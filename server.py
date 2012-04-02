@@ -38,6 +38,7 @@ import Cookie
 import SimulationFactory, Simulation
 import getopt
 import atexit
+import traceback
 
 chars = string.ascii_letters + string.digits
 sessionDict = {} # dictionary mapping session id's to session objects
@@ -164,13 +165,13 @@ class ScriptRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     def start_simulation(self):
        try:
           msg = ""
-          if( not 'filepath' in self.body ):
-             msg = msg + 'Must include the file' 
+          if( not 'fileURL' in self.body ):
+             msg = msg + 'Must include the file URL' 
           elif( not 'projectId' in self.body ):
              msg = msg + 'Must include the projectId'
           else:
              projectId = self.body['projectId'][0]
-             msg = SimulationFactory.newSimulation( self.body['file'][0], projectId )
+             msg = SimulationFactory.newSimulation( self.body['fileURL'][0], projectId )
           #os.popen('gridlabd IEEE_13_house_vvc.glm > testSUCCESS')
           self.resp_headers = {"Content-type":'text/html'} # default
           self.resp_headers['Content-length'] = len(msg)
@@ -182,6 +183,7 @@ class ScriptRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
           self.end_headers()
           self.wfile.write(msg)
        except IOError:
+          traceback.print_exc()
           self.send_error(404, "Exception starting simulation")
 
     def list_active_simulations():
@@ -347,10 +349,11 @@ if __name__=="__main__":
    # launch the server on the specified port
    import SocketServer
    s=SocketServer.TCPServer(('',port),ScriptRequestHandler)
+   SimulationFactory.setSocket( s )
    print "ScriptServer running on port %s" % port
    atexit.register(release_port, s)
    s.serve_forever()
-   #s.socket.close()
+   s.socket.close()
 
    
 

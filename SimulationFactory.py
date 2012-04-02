@@ -13,7 +13,14 @@ try:
 except Exception, e:
     print "Could not flush simulation directory %s" % e
     pass
-         
+
+savedSockets = []
+def setSocket(s):
+    savedSockets.append(s)
+
+def closeSockets():
+    for socket in savedSockets:
+        socket.socket.close()
 # Iterate through the simulation directory and find an unused id
 def getUnusedSimulationId():
     maxSimulationId = 0
@@ -30,12 +37,14 @@ def getUnusedSimulationId():
         
 def getSimulationProgress( projectId ):
     if( not projectId in allSimulations ):
-        return 'unknown project id'
+        print allSimulations
+        return 'unknown project id: %s'%projectId
     return allSimulations[projectId].getProgress()
 
 def getSimulationResults( projectId ):
     if( not projectId in allSimulations ):
-        return 'unknown project id'
+        print allSimulations
+        return 'unknown project id: %s'%projectId
     return allSimulations[projectId].getResults()
 
 # The server should not run more than 16 simulations at once
@@ -47,7 +56,7 @@ def activeSimulationCount():
             activeSimulations = activeSimulations + 1
     return activeSimulations
 
-def newSimulation( file,projectId, rootFileName ):
+def newSimulation( fileURL, projectId ):
     global simulationRootDirectory
     #nextSimulationId = nextSimulationId + 1
     #simId = nextSimulationId
@@ -56,8 +65,9 @@ def newSimulation( file,projectId, rootFileName ):
     if( projectId in allSimulations and not allSimulations[projectId].getTerminated() ):
         return 'Error: Simulation already started'
     simulationDirectory = simulationRootDirectory+ "/sim-" + str(projectId)
-    simulation = Simulation.Simulation( simulationDirectory, projectId, rootFileName )
+    simulation = Simulation.Simulation( simulationDirectory, projectId, fileURL )
     allSimulations[projectId] = simulation
+    print 'CREATED SIMULATION ID: %s'%projectId
     return 'SUCCESS'
 
 def beginSimulation( projectId ):
